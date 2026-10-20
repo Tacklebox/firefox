@@ -79,6 +79,10 @@ async function setupHosts(scripts) {
             return tmpDir.clone();
           } else if (property == "XRESysNativeManifests") {
             return tmpDir.clone();
+          } else if (property == "XREUserXDGNativeManifests") {
+            let dir = tmpDir.clone();
+            dir.append("xdg");
+            return dir;
           }
           return null;
         },

@@ -113,6 +113,12 @@ struct BootstrapConfig;
  */
 #  define XRE_SYS_NATIVE_MANIFESTS "XRESysNativeManifests"
 #  define XRE_USER_NATIVE_MANIFESTS "XREUserNativeManifests"
+/**
+ * Directory service key for the user-specific native manifests directory
+ * under the XDG config home ($XDG_CONFIG_HOME/mozilla). Only available on
+ * GTK, where it is searched before XRE_USER_NATIVE_MANIFESTS.
+ */
+#  define XRE_USER_XDG_NATIVE_MANIFESTS "XREUserXDGNativeManifests"
 #endif
 
 /**

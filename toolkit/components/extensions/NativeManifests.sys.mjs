@@ -38,6 +38,15 @@ export var NativeManifests = {
           Services.dirsvc.get("XREUserNativeManifests", Ci.nsIFile).path,
           Services.dirsvc.get("XRESysNativeManifests", Ci.nsIFile).path,
         ];
+        if (platform == "linux") {
+          try {
+            dirs.unshift(
+              Services.dirsvc.get("XREUserXDGNativeManifests", Ci.nsIFile).path
+            );
+          } catch (e) {
+            // Not available on non-GTK builds.
+          }
+        }
         this._lookup = (type, name, context) =>
           this._tryPaths(type, name, dirs, context);
       } else {

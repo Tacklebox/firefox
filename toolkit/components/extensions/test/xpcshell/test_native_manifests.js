@@ -57,9 +57,14 @@ let globalDir = dir.clone();
 globalDir.append("global");
 globalDir.create(Ci.nsIFile.DIRECTORY_TYPE, FileUtils.PERMS_DIRECTORY);
 
+let xdgDir = dir.clone();
+xdgDir.append("xdg");
+xdgDir.create(Ci.nsIFile.DIRECTORY_TYPE, FileUtils.PERMS_DIRECTORY);
+
 add_setup(async function setup() {
   await IOUtils.makeDirectory(PathUtils.join(userDir.path, TYPE_SLUG));
   await IOUtils.makeDirectory(PathUtils.join(globalDir.path, TYPE_SLUG));
+  await IOUtils.makeDirectory(PathUtils.join(xdgDir.path, TYPE_SLUG));
 });
 
 let dirProvider = {
@@ -68,6 +73,8 @@ let dirProvider = {
       return userDir.clone();
     } else if (property == "XRESysNativeManifests") {
       return globalDir.clone();
+    } else if (property == "XREUserXDGNativeManifests") {
+      return xdgDir.clone();
     }
     return null;
   },
@@ -352,6 +359,24 @@ add_task(async function test_good_manifest() {
     "lookupApplication returns the manifest contents"
   );
 });
+
+add_task(
+  { skip_if: () => AppConstants.platform != "linux" },
+  async function test_xdg_manifest_preferred_over_legacy() {
+    const XDG_TEST_JSON = PathUtils.join(xdgDir.path, TYPE_SLUG, "test.json");
+    const xdgManifest = { ...templateManifest, description: "from xdg" };
+    await writeManifest(USER_TEST_JSON, templateManifest);
+    await writeManifest(XDG_TEST_JSON, xdgManifest);
+
+    let result = await lookupApplication("test", context);
+    equal(result.path, XDG_TEST_JSON, "XDG manifest is found first");
+    deepEqual(result.manifest, xdgManifest, "XDG manifest contents returned");
+
+    await IOUtils.remove(XDG_TEST_JSON);
+    result = await lookupApplication("test", context);
+    equal(result.path, USER_TEST_JSON, "Falls back to the legacy directory");
+  }
+);
 
 add_task(
   { skip_if: () => AppConstants.platform != "win" },

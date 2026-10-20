@@ -428,7 +428,19 @@ nsXREDirProvider::GetFile(const char* aProperty, bool* aPersistent,
     rv = file->AppendNative(".mozilla"_ns);
 #  endif  // defined(XP_MACOSX)
   }
-#endif  // defined(XP_UNIX) || defined(XP_MACOSX)
+#  if defined(MOZ_WIDGET_GTK)
+  else if (!strcmp(aProperty, XRE_USER_XDG_NATIVE_MANIFESTS)) {
+    const char* homeDir = PR_GetEnv("HOME");
+    if (!homeDir || !*homeDir) {
+      return NS_ERROR_FAILURE;
+    }
+    rv = GetLegacyOrXDGEnvValue(homeDir, "XDG_CONFIG_HOME", ".config"_ns,
+                                getter_AddRefs(file), nullptr);
+    NS_ENSURE_SUCCESS(rv, rv);
+    rv = file->AppendNative("mozilla"_ns);
+  }
+#  endif  // defined(MOZ_WIDGET_GTK)
+#endif    // defined(XP_UNIX) || defined(XP_MACOSX)
   else if (!strcmp(aProperty, XRE_UPDATE_ROOT_DIR)) {
     rv = GetUpdateRootDir(getter_AddRefs(file));
   } else if (!strcmp(aProperty, XRE_OLD_UPDATE_ROOT_DIR)) {

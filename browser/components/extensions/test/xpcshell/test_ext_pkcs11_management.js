@@ -63,6 +63,7 @@ async function setupManifests(modules) {
         getFile(property) {
           if (
             property == "XREUserNativeManifests" ||
+            property == "XREUserXDGNativeManifests" ||
             property == "XRESysNativeManifests"
           ) {
             return new FileUtils.File(tmpDir);

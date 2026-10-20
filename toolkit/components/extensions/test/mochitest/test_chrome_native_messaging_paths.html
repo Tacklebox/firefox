@@ -50,6 +50,22 @@ add_task(async function test_default_paths() {
 
   let globalDir = Services.dirsvc.get("XRESysNativeManifests", Ci.nsIFile).path;
   is(globalDir, expectGlobal, "system-wide native messaing directory is correct");
+
+  if (AppConstants.platform == "linux") {
+    let configHome = Services.env.get("XDG_CONFIG_HOME");
+    if (!configHome.startsWith("/")) {
+      configHome = PathUtils.join(
+        Services.dirsvc.get("Home", Ci.nsIFile).path,
+        ".config"
+      );
+    }
+    let xdgDir = Services.dirsvc.get("XREUserXDGNativeManifests", Ci.nsIFile).path;
+    is(
+      xdgDir,
+      PathUtils.join(configHome, "mozilla"),
+      "XDG user-specific native messaging directory is correct"
+    );
+  }
 });
 
 </script>
